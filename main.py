@@ -2,6 +2,7 @@ import os
 import requests
 import pandas as pd
 from tqdm import tqdm
+import time
 
 def get_ip_from_file(filename):
     with open(filename, "r", encoding="utf-8") as f:
@@ -11,7 +12,7 @@ def get_ip_from_file(filename):
 def ipinfoapi(ips:list):
     url = 'http://ip-api.com/batch'
     ips_dict = [{'query': ip, "fields": "city,country,countryCode,isp,org,as,query"} for ip in ips]
-
+    time.sleep(1)
     try:
         resp = requests.post(url, json=ips_dict)
         if resp.status_code == 200:
