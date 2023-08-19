@@ -9,12 +9,11 @@ def get_ip_from_file(filename):
         ips = [line.strip() for line in f]
     return ips
 
-def ipinfoapi(ips:list):
+def ipinfoapi(ips:list, session):
     url = 'http://ip-api.com/batch'
     ips_dict = [{'query': ip, "fields": "city,country,countryCode,isp,org,as,query"} for ip in ips]
-    time.sleep(1)
     try:
-        resp = requests.post(url, json=ips_dict)
+        resp = session.post(url, json=ips_dict)
         if resp.status_code == 200:
             return resp.json()
         else:
@@ -30,12 +29,13 @@ def get_ip_info(ips):
     
     with tqdm(total=len(ips)) as bar:
         bar.set_description(f"Processed IP: {len(ips)}")
-        for i in range(0, len(ips), 100):
-            count = min(i+100, len(ips))
-            t = ipinfoapi(ips[i:i + 100])
-            if t != None:
-                ipsinfo += t
-            bar.update(100)
+        with requests.Session() as session:
+            for i in range(0, len(ips), 100):
+                count = min(i+100, len(ips))
+                t = ipinfoapi(ips[i:i + 100], session)
+                if t != None:
+                    ipsinfo += t
+                bar.update(100)
 
     return ipsinfo
 
