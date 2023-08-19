@@ -1,0 +1,52 @@
+name: cfip
+
+on:
+  schedule:
+    - cron: '30 20 * * *'
+
+# on: [push]
+
+env:
+  # Setting an environment variable with the value of a configuration variable
+  downloadurl: ${{ vars.DOWNLOADURL }}
+
+permissions:
+  contents: write
+      
+jobs:
+  update_data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - run: echo "start update"
+        
+    - name: Check my code
+      uses: actions/checkout@main
+    
+    - name: Remove old data
+      run: rm -rf ips
+    
+    - name: Get source data
+      run: |
+        wget -N $downloadurl -O ip.zip
+        unzip ip.zip -d ./ips
+        rm main.zip
+
+    - name: Set up Python
+      uses: actions/setup-python@main
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Run main.py
+      run: python -u main.py
+      
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git diff --exit-code && git commit -m "update result"
+        git push origin main
