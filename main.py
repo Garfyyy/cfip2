@@ -18,8 +18,10 @@ def ipinfoapi(ips:list):
             return resp.json()
         else:
             print(f'获取ip信息失败: {resp.status_code}, {resp.reason}')
+            return None
     except Exception as e:
         print(f'requests error:{e}')
+        return None
 
 def get_ip_info(ips):
     ipsinfo = []
@@ -29,7 +31,9 @@ def get_ip_info(ips):
         bar.set_description(f"Processed IP: {len(ips)}")
         for i in range(0, len(ips), 100):
             count = min(i+100, len(ips))
-            ipsinfo += ipinfoapi(ips[i:i+100])
+            t = ipinfoapi(ips[i:i + 100])
+            if t != None:
+                ipsinfo += t
             bar.update(100)
 
     return ipsinfo
