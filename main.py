@@ -2,7 +2,7 @@ import os
 import requests
 import pandas as pd
 from tqdm import tqdm
-import time
+from time import sleep
 
 def get_ip_from_file(filename):
     with open(filename, "r", encoding="utf-8") as f:
@@ -13,12 +13,12 @@ def ipinfoapi(ips:list, session):
     url = 'http://ip-api.com/batch'
     ips_dict = [{'query': ip, "fields": "city,country,countryCode,isp,org,as,query"} for ip in ips]
     try:
-        resp = session.post(url, json=ips_dict)
-        if resp.status_code == 200:
-            return resp.json()
-        else:
-            print(f'获取ip信息失败: {resp.status_code}, {resp.reason}')
-            return None
+        with session.post(url, json=ips_dict) as resp:
+            if resp.status_code == 200:
+                return resp.json()
+            else:
+                print(f'获取ip信息失败: {resp.status_code}, {resp.reason}')
+                return None
     except Exception as e:
         print(f'requests error:{e}')
         return None
